@@ -3,7 +3,7 @@ import { ReactNode, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight, BookOpen, Check, Cpu, Database, FileText, Footprints, Hourglass, Keyboard,
-  LayoutDashboard, Printer, Server, Wifi,
+  LayoutDashboard, Printer, Server, Wifi, ZoomIn, X
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Bullets, Count, Glass, Ph, Pill, Rise, Stagger, Title, Waterfall } from "./slide-ui";
@@ -45,45 +45,127 @@ function Cover() {
 /* 2 — Latar belakang */
 function Background() {
   const [a, setA] = useState(0);
+  const [zoomImg, setZoomImg] = useState<string | null>(null);
+
   const stats: [ReactNode, string][] = [
     [<Count key="a" to={1150000} />, "pieces per bulan, semua tipe produk"],
     [<>3 × 7</>, "shift × jam kerja per hari"],
     [<Count key="b" to={45} suf=" dtk" />, "terbuang per lot (motion)"],
     [<Count key="c" to={37.5} dec={1} suf=" mnt" />, "non-value added per shift"],
   ];
+
   const probs = [
-    { k: "Motion waste", i: <Footprints />, t: "Operator mondar-mandir meninggalkan stasiun untuk mengambil dan menulis part card manual setiap lot selesai. Rata-rata 45 detik per lot, terakumulasi hingga 37,5 menit per shift (7 jam) untuk aktivitas non-value added." },
-    { k: "Paper waste", i: <FileText />, t: "Human error penulisan manual memicu pemborosan kertas, dibuktikan 4 bukti teguran tertulis manajemen (1 Sep – 31 Okt 2026): sisa kartu menumpuk di laci, kartu tanpa keterangan lengkap pada 3 kantong besar, dan lupa menyertakan part card pada FC L.comp K2SM.", ph: "Placeholder: gambar bukti chat teguran" },
-    { k: "Information lead time", i: <Hourglass />, t: "Rekapitulasi dilakukan di akhir shift sehingga ada jeda informasi 7 jam. Staf pendataan menanggung redundant data entry (menyalin ulang dari kertas ke komputer) selama 20 menit per hari." },
+    {
+      k: "Motion waste",
+      i: <Footprints />,
+      t: "Operator mondar-mandir meninggalkan stasiun untuk mengambil dan menulis part card manual setiap lot selesai. Rata-rata 45 detik per lot, terakumulasi hingga 37,5 menit per shift (7 jam) untuk aktivitas non-value added.",
+    },
+    {
+      k: "Paper waste",
+      i: <FileText />,
+      t: "Human error penulisan manual memicu pemborosan kertas, dibuktikan 4 bukti teguran tertulis manajemen (1 Sep – 31 Okt 2026): sisa kartu menumpuk di laci, kartu tanpa keterangan lengkap pada 3 kantong besar, dan lupa menyertakan part card pada FC L.comp K2SM.",
+      img: "/bukti-chat.png", // <-- Sesuaikan dengan nama file di folder public/images/
+      alt: "Bukti chat teguran tertulis dari manajemen terkait kesalahan part card",
+    },
+    {
+      k: "Information lead time",
+      i: <Hourglass />,
+      t: "Rekapitulasi dilakukan di akhir shift sehingga ada jeda informasi 7 jam. Staf pendataan menanggung redundant data entry (menyalin ulang dari kertas ke komputer) selama 20 menit per hari.",
+    },
   ];
+
   const p = probs[a];
+
   return (
-    <Stagger>
-      <Title tag="Latar belakang">Skala produksi besar, pencatatan masih manual</Title>
-      <Rise className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-        {stats.map(([v, l], n) => (
-          <Glass key={n} className="p-4"><p className={`${D} text-2xl font-semibold text-cyan-300 md:text-3xl`}>{v}</p><p className="mt-1 text-xs text-slate-400">{l}</p></Glass>
-        ))}
-      </Rise>
-      <Rise className="mb-3 text-xs text-slate-400">Lini plating memakai Automatic Zinc Barrel and Rack Machines serta mesin Chromating Barrel (otomatis & manual) untuk Trivalent Black, Coloured, dan Glossy. Pilih satu dari tiga akar masalah di Final Check:</Rise>
-      <Rise className="grid gap-4 md:grid-cols-[1fr_2fr]">
-        <div className="flex gap-2 md:flex-col">
-          {probs.map((x, n) => (
-            <Pill key={x.k} on={a === n} onClick={() => setA(n)} className="flex flex-1 items-center gap-2 md:flex-none">{x.i}{x.k}</Pill>
+    <>
+      <Stagger>
+        <Title tag="Latar belakang">Skala produksi besar, pencatatan masih manual</Title>
+        <Rise className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {stats.map(([v, l], n) => (
+            <Glass key={n} className="p-4">
+              <p className={`${D} text-2xl font-semibold text-cyan-300 md:text-3xl`}>{v}</p>
+              <p className="mt-1 text-xs text-slate-400">{l}</p>
+            </Glass>
           ))}
+        </Rise>
+
+        <Rise className="mb-3 text-xs text-slate-400">
+          Lini plating memakai Automatic Zinc Barrel and Rack Machines serta mesin Chromating Barrel (otomatis & manual) untuk Trivalent Black, Coloured, dan Glossy. Pilih satu dari tiga akar masalah di Final Check:
+        </Rise>
+
+        <Rise className="grid gap-4 md:grid-cols-[1fr_2fr]">
+          <div className="flex gap-2 md:flex-col">
+            {probs.map((x, n) => (
+              <Pill key={x.k} on={a === n} onClick={() => setA(n)} className="flex flex-1 items-center gap-2 md:flex-none">
+                {x.i}
+                {x.k}
+              </Pill>
+            ))}
+          </div>
+
+          <Glass>
+            <Swap k={a}>
+              <p className="text-sm leading-relaxed text-slate-200">{p.t}</p>
+
+              {/* Thumbnail Gambar yang Bisa Diklik */}
+              {p.img && (
+                <button
+                  type="button"
+                  onClick={() => setZoomImg(p.img!)}
+                  className="group relative mt-3 block w-full overflow-hidden rounded-lg border border-white/15 bg-slate-950/60 text-left transition hover:border-cyan-400/50 focus:outline-none"
+                >
+                  <img
+                    src={p.img}
+                    alt={p.alt}
+                    className="max-h-44 w-full object-cover object-top transition duration-300 group-hover:scale-[1.02] group-hover:opacity-80"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-950/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    <span className="flex items-center gap-1.5 rounded-full border border-cyan-400/40 bg-slate-900/90 px-3 py-1.5 text-xs font-medium text-cyan-300 shadow-lg">
+                      <ZoomIn className="h-3.5 w-3.5" />
+                      Klik untuk memperbesar
+                    </span>
+                  </div>
+                </button>
+              )}
+            </Swap>
+
+            <p className="mt-4 border-t border-white/10 pt-3 text-xs text-slate-400">
+              Studi terdahulu: pemborosan gerak dan waktu tunggu termasuk penyumbang terbesar yang memperpanjang cycle time dan menurunkan efisiensi kapasitas (Kholil et al., 2022).
+            </p>
+          </Glass>
+        </Rise>
+      </Stagger>
+
+      {/* Modal Pop-up Zoom Gambar */}
+      {zoomImg && (
+        <div
+          onClick={() => setZoomImg(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-xl border border-white/15 bg-slate-900 p-2 shadow-2xl"
+          >
+            <button
+              type="button"
+              onClick={() => setZoomImg(null)}
+              aria-label="Tutup gambar"
+              className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-slate-950/80 text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <img
+              src={zoomImg}
+              alt="Bukti chat teguran diperbesar"
+              className="max-h-[85vh] w-auto rounded-lg object-contain"
+            />
+          </div>
         </div>
-        <Glass>
-          <Swap k={a}>
-            <p className="text-sm leading-relaxed text-slate-200">{p.t}</p>
-            {p.ph && <Ph label={p.ph} className="mt-3" />}
-          </Swap>
-          <p className="mt-4 border-t border-white/10 pt-3 text-xs text-slate-400">Studi terdahulu: pemborosan gerak dan waktu tunggu termasuk penyumbang terbesar yang memperpanjang cycle time dan menurunkan efisiensi kapasitas (Kholil et al., 2022).</p>
-        </Glass>
-      </Rise>
-    </Stagger>
+      )}
+    </>
   );
 }
-
 /* 3 — Rumusan masalah & tujuan */
 function Goals() {
   const [m, setM] = useState<"rm" | "tj">("rm");
@@ -162,32 +244,103 @@ function Benefits() {
 /* 6 — Tinjauan pustaka */
 function Literature() {
   const [a, setA] = useState(0);
+  const [zoomImg, setZoomImg] = useState<string | null>(null);
+
   const c = [
     { t: "IoT & pemantauan real-time", m: ["1–2 detik deteksi anomali"], x: "Arsitektur IoT berbiaya rendah berbasis RESTful API, MQTT, maupun RF terbukti memangkas latensi deteksi anomali dan meningkatkan efisiensi produksi.", r: "Vo et al., 2026; Abdulmalek et al., 2026; Chai et al., 2024; Yeh et al., 2021" },
     { t: "Smart manufacturing & integrasi sistem", m: ["Downtime 1,32 → 0,13 jam", "Kesalahan informasi 41,5% → 16,2%"], x: "Penerapan IIoT, Digital Twin, CMMS, dan Information Hub terpusat menekan downtime harian, menurunkan kesalahan informasi, serta memangkas waktu pertukaran data.", r: "Wang et al., 2024; Robby Maududy et al., 2026; Yehorchenkova et al., 2024" },
     { t: "Metodologi & latensi", m: ["Waterfall + Black-box", "API stabil di beban tinggi"], x: "Waterfall dan Black-box Testing tervalidasi efektif pada pengembangan perangkat IoT terintegrasi web, sementara uji beban API menunjukkan kestabilan transmisi di bawah beban tinggi.", r: "M Mujiono et al., 2023; de Mendonça Moreira et al., 2026" },
   ][a];
+
+  const finalCheckImg = "/meja-fc.jpeg"; // <-- Sesuaikan dengan nama file foto Anda di public/images/
+
   return (
-    <Stagger>
-      <Title tag="Bab II">Sintesis 20 literatur utama (2021–2026) dan posisi riset</Title>
-      <Rise className="grid gap-4 md:grid-cols-[1fr_1.6fr]">
-        <div className="flex flex-col gap-2">
-          {["IoT & pemantauan real-time", "Smart manufacturing & integrasi sistem", "Metodologi & latensi"].map((t, n) => <Pill key={t} on={a === n} onClick={() => setA(n)}>{t}</Pill>)}
+    <>
+      <Stagger>
+        <Title tag="Bab II">Sintesis 20 literatur utama (2021–2026) dan posisi riset</Title>
+        <Rise className="grid gap-4 md:grid-cols-[1fr_1.6fr]">
+          <div className="flex flex-col gap-2">
+            {["IoT & pemantauan real-time", "Smart manufacturing & integrasi sistem", "Metodologi & latensi"].map((t, n) => (
+              <Pill key={t} on={a === n} onClick={() => setA(n)}>
+                {t}
+              </Pill>
+            ))}
+          </div>
+          <Glass>
+            <Swap k={a}>
+              <div className="mb-3 flex flex-wrap gap-2">
+                {c.m.map((x) => (
+                  <Badge key={x} className="bg-cyan-400/15 text-cyan-200">
+                    {x}
+                  </Badge>
+                ))}
+              </div>
+              <p className="text-sm leading-relaxed text-slate-200">{c.x}</p>
+              <p className="mt-3 text-xs text-slate-500">{c.r}</p>
+            </Swap>
+          </Glass>
+        </Rise>
+
+        <Rise className="mt-4 grid items-stretch gap-4 md:grid-cols-[1.6fr_1fr]">
+          <Glass className="border-amber-300/30 bg-amber-300/[0.05]">
+            <p className={`${D} mb-1 text-amber-300`}>Research gap</p>
+            <p className="text-sm leading-relaxed text-slate-200">
+              Mengisi celah penerapan IoT HMI berbiaya rendah (retrofit) yang menggabungkan output fisik instan (thermal part card) sekaligus pencatatan cloud real-time langsung dari stasiun inspeksi manual (final check).
+            </p>
+          </Glass>
+
+          {/* Thumbnail Foto Meja Final Check */}
+          <button
+            type="button"
+            onClick={() => setZoomImg(finalCheckImg)}
+            className="group relative flex min-h-[140px] w-full overflow-hidden rounded-2xl border border-white/15 bg-slate-950/60 text-left transition hover:border-cyan-400/50 focus:outline-none"
+          >
+            <img
+              src={finalCheckImg}
+              alt="Kondisi meja stasiun inspeksi manual final check"
+              className="h-full w-full object-cover transition duration-300 group-hover:scale-105 group-hover:opacity-80"
+            />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/50 to-transparent p-3">
+              <p className="text-xs font-medium text-slate-200">Meja Final Check (Kondisi Eksisting)</p>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <span className="flex items-center gap-1.5 rounded-full border border-cyan-400/40 bg-slate-900/90 px-3 py-1.5 text-xs font-medium text-cyan-300 shadow-lg">
+                <ZoomIn className="h-3.5 w-3.5" />
+                Perbesar
+              </span>
+            </div>
+          </button>
+        </Rise>
+      </Stagger>
+
+      {/* Modal Pop-up Zoom Gambar */}
+      {zoomImg && (
+        <div
+          onClick={() => setZoomImg(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-xl border border-white/15 bg-slate-900 p-2 shadow-2xl"
+          >
+            <button
+              type="button"
+              onClick={() => setZoomImg(null)}
+              aria-label="Tutup gambar"
+              className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-slate-950/80 text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <img
+              src={zoomImg}
+              alt="Foto meja final check diperbesar"
+              className="max-h-[85vh] w-auto rounded-lg object-contain"
+            />
+          </div>
         </div>
-        <Glass>
-          <Swap k={a}>
-            <div className="mb-3 flex flex-wrap gap-2">{c.m.map((x) => <Badge key={x} className="bg-cyan-400/15 text-cyan-200">{x}</Badge>)}</div>
-            <p className="text-sm leading-relaxed text-slate-200">{c.x}</p>
-            <p className="mt-3 text-xs text-slate-500">{c.r}</p>
-          </Swap>
-        </Glass>
-      </Rise>
-      <Rise className="mt-4 grid items-stretch gap-4 md:grid-cols-[1.6fr_1fr]">
-        <Glass className="border-amber-300/30 bg-amber-300/[0.05]"><p className={`${D} mb-1 text-amber-300`}>Research gap</p>
-          <p className="text-sm leading-relaxed text-slate-200">Mengisi celah penerapan IoT HMI berbiaya rendah (retrofit) yang menggabungkan output fisik instan (thermal part card) sekaligus pencatatan cloud real-time langsung dari stasiun inspeksi manual (final check).</p></Glass>
-        <Ph label="Placeholder: foto meja final check" />
-      </Rise>
-    </Stagger>
+      )}
+    </>
   );
 }
 
@@ -232,25 +385,105 @@ function Theory() {
 /* 8 — Metodologi */
 function Method() {
   const [a, setA] = useState(0);
+  const [zoomImg, setZoomImg] = useState<string | null>(null);
+
   const ph = [
     { t: "Studi literatur & observasi lapangan", x: "Mengkaji referensi ilmiah terkait IoT, HMI, Web API, dan Lean Manufacturing, sekaligus mengamati langsung alur pencatatan part card manual di stasiun Final Check Departemen Plating PT. Mitrametal Perkasa." },
     { t: "Identifikasi & perumusan masalah", x: "Memetakan tiga permasalahan utama — information lead time 7 jam, motion waste, dan paper waste — lalu merumuskannya ke dalam pertanyaan teknis perancangan hardware HMI dan antarmuka cloud." },
     { t: "Penentuan tujuan & batasan masalah", x: "Menetapkan target luaran purwarupa sebagai parameter keberhasilan serta membatasi ruang lingkup hingga pengujian fungsional tanpa implementasi permanen di lini massal maupun integrasi langsung ke ERP eksisting." },
   ];
+
+  const flowchartImg = "/diagram-alir.png"; // <-- Sesuaikan dengan nama file di public/images/
+
   return (
-    <Stagger>
-      <Title tag="Bab III">Metodologi: tiga fase makro dengan kerangka Waterfall</Title>
-      <div className="grid gap-4 md:grid-cols-[1fr_1.2fr]">
-        <Rise><Ph label="Placeholder: diagram alir penelitian" className="h-full min-h-56" /></Rise>
-        <Rise className="space-y-3">
-          <Glass className="p-4"><p className="mb-2 text-sm font-medium text-cyan-300">1. Tahap pendahuluan <span className="font-normal text-slate-400">— pemetaan masalah & penetapan arah proyek</span></p>
-            <div className="flex flex-wrap gap-2">{ph.map((p, n) => <Pill key={p.t} on={a === n} onClick={() => setA(n)} className="px-3 py-1.5 text-xs">{n + 1}. {p.t}</Pill>)}</div>
-            <Swap k={a}><p className="mt-3 text-sm leading-relaxed text-slate-300">{ph[a].x}</p></Swap></Glass>
-          <Glass className="p-4"><p className="text-sm font-medium text-cyan-300">2. Pengembangan sistem dengan metode Waterfall</p><p className="mt-1 text-sm text-slate-300">Requirement, Design, Implementation, Verification, Maintenance — sekuensial-linier: setiap fase tuntas dan dievaluasi sebelum ke fase berikutnya, untuk meminimalkan kesalahan arsitektur hardware maupun software sejak dini.</p></Glass>
-          <Glass className="p-4"><p className="text-sm font-medium text-cyan-300">3. Tahap analisis & penutup</p><p className="mt-1 text-sm text-slate-300">Evaluasi dampak uji coba serta penarikan kesimpulan dan saran.</p></Glass>
-        </Rise>
-      </div>
-    </Stagger>
+    <>
+      <Stagger>
+        <Title tag="Bab III">Metodologi: tiga fase makro dengan kerangka Waterfall</Title>
+        <div className="grid gap-4 md:grid-cols-[1fr_1.2fr]">
+          {/* Thumbnail Diagram Alir Penelitian */}
+          <Rise>
+            <button
+              type="button"
+              onClick={() => setZoomImg(flowchartImg)}
+              className="group relative flex h-full min-h-56 w-full items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white p-3 text-left transition hover:border-cyan-400/50 focus:outline-none"
+            >
+              <img
+                src={flowchartImg}
+                alt="Diagram alir penelitian metode Waterfall"
+                className="max-h-80 w-full object-contain transition duration-300 group-hover:scale-[1.03] group-hover:opacity-85"
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/50 to-transparent p-3">
+                <p className="text-xs font-medium text-slate-200">Diagram Alir Penelitian</p>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-950/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                <span className="flex items-center gap-1.5 rounded-full border border-cyan-400/40 bg-slate-900/90 px-3 py-1.5 text-xs font-medium text-cyan-300 shadow-lg">
+                  <ZoomIn className="h-3.5 w-3.5" />
+                  Klik untuk memperbesar
+                </span>
+              </div>
+            </button>
+          </Rise>
+
+          <Rise className="space-y-3">
+            <Glass className="p-4">
+              <p className="mb-2 text-sm font-medium text-cyan-300">
+                1. Tahap pendahuluan <span className="font-normal text-slate-400">— pemetaan masalah & penetapan arah proyek</span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {ph.map((p, n) => (
+                  <Pill key={p.t} on={a === n} onClick={() => setA(n)} className="px-3 py-1.5 text-xs">
+                    {n + 1}. {p.t}
+                  </Pill>
+                ))}
+              </div>
+              <Swap k={a}>
+                <p className="mt-3 text-sm leading-relaxed text-slate-300">{ph[a].x}</p>
+              </Swap>
+            </Glass>
+
+            <Glass className="p-4">
+              <p className="text-sm font-medium text-cyan-300">2. Pengembangan sistem dengan metode Waterfall</p>
+              <p className="mt-1 text-sm text-slate-300">
+                Requirement, Design, Implementation, Verification, Maintenance — sekuensial-linier: setiap fase tuntas dan dievaluasi sebelum ke fase berikutnya, untuk meminimalkan kesalahan arsitektur hardware maupun software sejak dini.
+              </p>
+            </Glass>
+
+            <Glass className="p-4">
+              <p className="text-sm font-medium text-cyan-300">3. Tahap analisis & penutup</p>
+              <p className="mt-1 text-sm text-slate-300">Evaluasi dampak uji coba serta penarikan kesimpulan dan saran.</p>
+            </Glass>
+          </Rise>
+        </div>
+      </Stagger>
+
+      {/* Modal Pop-up Zoom Gambar */}
+      {zoomImg && (
+        <div
+          onClick={() => setZoomImg(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-white  p-4 backdrop-blur-sm"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-h-none max-w-4xl overflow-hidden rounded-xl border border-white/15 bg-white p-2 shadow-2xl"
+          >
+            <button
+              type="button"
+              onClick={() => setZoomImg(null)}
+              aria-label="Tutup gambar"
+              className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-slate-950/80 text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <img
+              src={zoomImg}
+              alt="Diagram alir penelitian diperbesar"
+              className="max-h-[85vh] w-auto rounded-lg object-contain"
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
